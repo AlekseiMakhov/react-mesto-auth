@@ -1,4 +1,4 @@
-function SignIn({onSignUpClick, onSignInClick}) {
+function SignUp({onSignUpClick, onSignInClick}) {
     return (
         <section className="sign">
             <h2 className="sign__title">Регистрация</h2>
@@ -10,4 +10,4 @@ function SignIn({onSignUpClick, onSignInClick}) {
     );
 }
 
-export default SignIn;
+export default SignUp;

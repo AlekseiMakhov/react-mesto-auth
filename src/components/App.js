@@ -12,12 +12,16 @@ import ValidationContext from '../contexts/ValidationContext';
 import LoadingState from '../contexts/LoadingState';
 import api from '../utils/Api';
 import SignIn from './SignUp';
+import PopupWithAlert from './PopupWithAlert';
+import SignUp from './SignUp';
 
 function App() {
   const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
   const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
   const [isPopupWithSubmitOpen, setIsPopupWithSubmitOpen] = useState(false);
+  const [isShowAlertOpen, setIsShowAlertOpen] = useState(false);
+  const [signInState, setSignInState] = useState(false);
   const [selectedCard, setSelectedCard] = useState(false);
   const [loadingText, setLoadingText] = useState('');
   const [card, setCard] = useState({});
@@ -67,6 +71,7 @@ function App() {
     setvalidationContext({ validation: [true, true], validationText: ['', ''], isValid: true });
     document.addEventListener('keydown', handleEscButton);
   }
+
   // Открытие формы добавления карточки
   function handleAddPlaceClick() {
     setIsAddPlacePopupOpen(true);
@@ -75,6 +80,13 @@ function App() {
     setvalidationContext({ validation: [true, true], validationText: ['', ''], isValid: false });
     document.addEventListener('keydown', handleEscButton);
   }
+  
+  function handleSignInClick() {
+    setIsShowAlertOpen(true);
+    setSignInState(true);
+    document.addEventListener('keydown', handleEscButton);
+  }
+  
   // Отмена всплытия для закрытия по клику по оверлею
   function noClose(e) {
     e.stopPropagation();
@@ -177,6 +189,7 @@ function App() {
     setIsAddPlacePopupOpen(false);
     setIsPopupWithSubmitOpen(false);
     setSelectedCard(false);
+    setIsShowAlertOpen(false);
     document.removeEventListener('keydown', handleEscButton);
     setvalidationContext({ validation: [], validationText: [], isValid: false });
     setCard({});
@@ -187,15 +200,18 @@ function App() {
         <CurrentUserContext.Provider value={currentUser}>
             <Header user="aleksey.makhov@gmail.com" buttonText="Выйти"/>
             
-            {!currentUser ? <Main
-                onEditProfile={handleEditProfileClick}
-                onEditAvatar={handleEditAvatarClick}
-                onAddPlace={handleAddPlaceClick}
-                onCardClick={handleCardClick}
-                onCardLike={handleCardLike}
-                onDeleteCard={handleDeleteCardClick}
-                cards={cards}
-            /> : <SignIn />}
+            {!currentUser 
+              ? <Main
+                  onEditProfile={handleEditProfileClick}
+                  onEditAvatar={handleEditAvatarClick}
+                  onAddPlace={handleAddPlaceClick}
+                  onCardClick={handleCardClick}
+                  onCardLike={handleCardLike}
+                  onDeleteCard={handleDeleteCardClick}
+                  cards={cards}
+              /> 
+              : <SignIn onSignInClick={handleSignInClick} />
+            }
 
             <Footer />
 
@@ -240,6 +256,13 @@ function App() {
                 isOpen={selectedCard}
                 onClose={closeAllPopups}
                 card={card}
+                noClose={noClose}
+            />
+            <PopupWithAlert
+                success={signInState}
+                isOpen={isShowAlertOpen}
+                onClose={closeAllPopups}
+                messageText={'Хуйня какая-то!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'}
                 noClose={noClose}
             />
         </CurrentUserContext.Provider>

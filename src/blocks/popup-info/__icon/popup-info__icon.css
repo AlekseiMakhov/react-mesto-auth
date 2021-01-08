@@ -1,0 +1,11 @@
+.popup-info__icon {
+    background-image: url(../../../images/Union.svg);
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    background-size: cover;
+    padding: 0;
+    border: none;
+    background-color: transparent;
+    margin: 60px 0 32px;
+}
