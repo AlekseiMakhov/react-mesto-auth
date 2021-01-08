@@ -11,6 +11,7 @@ import CurrentUserContext from '../contexts/CurrentUserContext';
 import ValidationContext from '../contexts/ValidationContext';
 import LoadingState from '../contexts/LoadingState';
 import api from '../utils/Api';
+import SignIn from './SignUp';
 
 function App() {
   const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
@@ -184,9 +185,9 @@ function App() {
   return (
   // Оборачиваем в контекст текущего пользователя
         <CurrentUserContext.Provider value={currentUser}>
-            <Header />
-
-            <Main
+            <Header user="aleksey.makhov@gmail.com" buttonText="Выйти"/>
+            
+            {!currentUser ? <Main
                 onEditProfile={handleEditProfileClick}
                 onEditAvatar={handleEditAvatarClick}
                 onAddPlace={handleAddPlaceClick}
@@ -194,7 +195,7 @@ function App() {
                 onCardLike={handleCardLike}
                 onDeleteCard={handleDeleteCardClick}
                 cards={cards}
-            />
+            /> : <SignIn />}
 
             <Footer />
 
