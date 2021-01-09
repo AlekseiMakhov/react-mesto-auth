@@ -1,0 +1,16 @@
+.sign__error-text {
+    margin: 7px auto 10px;
+    max-width: 882px;
+    color: #f00;
+    font-size: 12px;
+    line-height: 15px;
+    font-weight: normal;
+    opacity: 0;
+    height: 20px;
+}
+
+/* @media screen and (max-width: 620px) {
+    .sign__error-text {
+        margin: 5px 20px 0;
+    }
+} */

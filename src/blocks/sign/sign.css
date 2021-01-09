@@ -1,7 +1,11 @@
 @import url(./__button/sign__button.css);
+@import url(./__button/_disabled/popup-form__submit-button_disabled.css);
 @import url(./__input/sign__input.css);
+@import url(./__input/_type_error/popup-form__text-input_type_error.css);
 @import url(./__text/sign__text.css);
 @import url(./__title/sign__title.css);
+@import url(./__error-text/sign__error-text.css);
+@import url(./__error-text/_show/sign__error-text_show.css);
 
 .sign {
     margin: 0;

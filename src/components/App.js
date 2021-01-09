@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Route, Switch, Redirect } from 'react-router-dom';
 import Header from './Header';
 import Main from './Main';
 import Footer from './Footer';
@@ -11,9 +12,10 @@ import CurrentUserContext from '../contexts/CurrentUserContext';
 import ValidationContext from '../contexts/ValidationContext';
 import LoadingState from '../contexts/LoadingState';
 import api from '../utils/Api';
-import SignIn from './SignUp';
 import PopupWithAlert from './PopupWithAlert';
-import SignUp from './SignUp';
+import Login from './Login';
+import Register from './Register';
+import ProtectedRoute from './ProtectedRoute';
 
 function App() {
   const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
@@ -21,20 +23,21 @@ function App() {
   const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
   const [isPopupWithSubmitOpen, setIsPopupWithSubmitOpen] = useState(false);
   const [isShowAlertOpen, setIsShowAlertOpen] = useState(false);
-  const [signInState, setSignInState] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
   const [selectedCard, setSelectedCard] = useState(false);
   const [loadingText, setLoadingText] = useState('');
   const [card, setCard] = useState({});
   const [cards, setCards] = useState([]);
   const [currentUser, setCurrentUser] = useState({});
-  const [validationContext, setvalidationContext] = useState({ validation: [], validationText: [], isValid: false });
+  const [signInScreen, setSignInScreen] = useState(true);
+  const [email, setEmail] = useState('');
+  const [validationContext, setvalidationContext] = useState({ validation: [true, true], validationText: ['', ''], isValid: false });
 
-  // Обработка ввода (установка глобального стейта валидации) подходит для любого числа элементов
-  // Элементам, которые требуется валидировать, нужно выставить уникальные id, положительные целые числа, начиная с 0
+  // Элементам, которые требуется валидировать, нужно выставить уникальные id, которые заканчиваются на цифру от 0 до 9
   function handleInput(e) {
     const validArr = validationContext.validation;
     const textArr = validationContext.validationText;
-    const index = Number(e.target.id);
+    const index = Number(e.target.id[e.target.id.length-1]);
     let resValid = 0;
 
     validArr[index] = e.target.validity.valid;
@@ -52,6 +55,7 @@ function App() {
       closeAllPopups();
     }
   }
+
   // Открытие формы редактирования аватара
   function handleEditAvatarClick() {
     setIsEditAvatarPopupOpen(true);
@@ -81,12 +85,6 @@ function App() {
     document.addEventListener('keydown', handleEscButton);
   }
   
-  function handleSignInClick() {
-    setIsShowAlertOpen(true);
-    setSignInState(true);
-    document.addEventListener('keydown', handleEscButton);
-  }
-  
   // Отмена всплытия для закрытия по клику по оверлею
   function noClose(e) {
     e.stopPropagation();
@@ -106,20 +104,21 @@ function App() {
     document.addEventListener('keydown', handleEscButton);
   }
   // Чтение с сервера инфо пользователя, данных карточки
-  useEffect(() => {
-    Promise.all([
-      api.getProfileInfo(),
-      api.getInitialCards(),
-    ])
-      .then((values) => {
-        const [profileInfo, cardList] = values;
-        setCurrentUser(profileInfo);
-        setCards(cardList);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, []);
+  // useEffect(() => {
+  //   Promise.all([
+  //     api.getProfileInfo(),
+  //     api.getInitialCards(),
+  //   ])
+  //     .then((values) => {
+  //       const [profileInfo, cardList] = values;
+  //       setCurrentUser(profileInfo);
+  //       setCards(cardList);
+  //     })
+  //     .catch((err) => {
+  //       console.log(err);
+  //     });
+  // }, []);
+
   // Убрать/поставить лайк карточке
   function handleCardLike(card) {
     const isLiked = card.likes.some((i) => i._id === currentUser._id);
@@ -198,25 +197,46 @@ function App() {
   return (
   // Оборачиваем в контекст текущего пользователя
         <CurrentUserContext.Provider value={currentUser}>
-            <Header user="aleksey.makhov@gmail.com" buttonText="Выйти"/>
+            <Header 
+                  email={email} 
+                  loggedIn={loggedIn} 
+                  signInScreen={signInScreen} 
+                  // handleLogout={handleLogout} 
+                  // handleSignUp={handleSignUp} 
+                  // handleSignIn={handleSignIn} 
+            />
+             {/* Оборачиваем в контекст стейта валидации */}
+              <ValidationContext.Provider value={validationContext}>
+
+                <Switch>
+                    <ProtectedRoute 
+                                  path="/cards" 
+                                  loggedIn={loggedIn}  
+                                  component={Main} 
+                                  onEditProfile={handleEditProfileClick}
+                                  onEditAvatar={handleEditAvatarClick}
+                                  onAddPlace={handleAddPlaceClick}
+                                  onCardClick={handleCardClick}
+                                  onCardLike={handleCardLike}
+                                  onDeleteCard={handleDeleteCardClick}
+                                  cards={cards}/>
+                      {setSignInScreen(false)}
+                  <Route path="/signup">
+                      <Register />
+                      {setSignInScreen(false)}
+                  </Route>
+                  <Route path="/signin">
+                      {setSignInScreen(true)}
+                      <Login />
+                  </Route>
+                  <Route exact path="/">
+                      {loggedIn ? <Redirect to="/cards" /> : <Redirect to="/signin" />}
+                  </Route>
+              </Switch>   
             
-            {!currentUser 
-              ? <Main
-                  onEditProfile={handleEditProfileClick}
-                  onEditAvatar={handleEditAvatarClick}
-                  onAddPlace={handleAddPlaceClick}
-                  onCardClick={handleCardClick}
-                  onCardLike={handleCardLike}
-                  onDeleteCard={handleDeleteCardClick}
-                  cards={cards}
-              /> 
-              : <SignIn onSignInClick={handleSignInClick} />
-            }
+              <Footer />
 
-            <Footer />
-
-            {/* Оборачиваем в контекст стейта валидации */}
-            <ValidationContext.Provider value={validationContext}>
+           
                 <LoadingState.Provider value={loadingText}>
                     <EditProfilePopup
                         isOpen={isEditProfilePopupOpen}
@@ -256,13 +276,6 @@ function App() {
                 isOpen={selectedCard}
                 onClose={closeAllPopups}
                 card={card}
-                noClose={noClose}
-            />
-            <PopupWithAlert
-                success={signInState}
-                isOpen={isShowAlertOpen}
-                onClose={closeAllPopups}
-                messageText={'Хуйня какая-то!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'}
                 noClose={noClose}
             />
         </CurrentUserContext.Provider>

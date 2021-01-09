@@ -5,11 +5,14 @@
     line-height: 22px;
     font-weight: 400;
     color: #fff;
+    justify-self: flex-end;
 }
 
 .header__text:last-of-type {
+    margin-right: 19px;
     margin-left: 24px;
     cursor: pointer;
+    color: #a9a9a9;
 }
 
 .header__text:last-of-type:hover {

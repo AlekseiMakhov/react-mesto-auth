@@ -34,7 +34,7 @@ function EditAvatarPopup({
             title='Обновить аватар'
             children={
                 <>
-                    <input onInput={onInput} name="avatar" ref={avatar} id="0" type="url" className={cn('popup-form__text-input', { 'popup-form__text-input_type_error': !validationContext.validation[0] })} placeholder="Ссылка на картинку" required />
+                    <input onInput={onInput} name="avatar" ref={avatar} id="avatar0" type="url" className={cn('popup-form__text-input', { 'popup-form__text-input_type_error': !validationContext.validation[0] })} placeholder="Ссылка на картинку" required />
                     <span id="avatar-error" className={cn('popup-form__error-text', { 'popup-form__error-text_show': !validationContext.validation[0] })}>{validationContext.validationText[0]}</span>
                 </>
             }
