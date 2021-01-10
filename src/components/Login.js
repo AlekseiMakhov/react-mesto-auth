@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { authorize } from '../utils/auth';
 
-function Login({  successLogin, abortLogin }) {
+function Login({ setOpen, onLogin }) {
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -18,14 +18,19 @@ function Login({  successLogin, abortLogin }) {
         }
         authorize(email, password)
             .then((data) => {
-                if (data.jwt) {
+                if (data.token) {
                     setEmail('');
                     setPassword('');
-                    successLogin();
+                    onLogin();
                     history.push('/cards');
-                }
+                } else {
+                    setOpen(false);
+                    console.log(data.error);
+                }  
             })
-            .catch(err => {console.log(err); abortLogin()} );
+            .catch(err => {console.log(err); 
+                setOpen(false);
+            });
     } 
 
     return (

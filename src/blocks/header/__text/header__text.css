@@ -6,15 +6,23 @@
     font-weight: 400;
     color: #fff;
     justify-self: flex-end;
+    text-decoration: none;
 }
 
-.header__text:last-of-type {
-    margin-right: 19px;
+.header__text:last-child {
+    
     margin-left: 24px;
     cursor: pointer;
     color: #a9a9a9;
+    text-decoration: none;
 }
 
-.header__text:last-of-type:hover {
+.header__text:last-child:hover {
     opacity: .6;
+}
+
+@media screen and (max-width: 920px) {
+    .header__text:last-child {
+        margin-right: 19px;
+    }
 }

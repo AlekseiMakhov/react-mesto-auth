@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Route, Switch, Redirect } from 'react-router-dom';
+import { Route, Switch, Redirect, useHistory } from 'react-router-dom';
+import { useMediaQuery } from 'react-responsive';
 import Header from './Header';
 import Main from './Main';
 import Footer from './Footer';
@@ -12,26 +13,31 @@ import CurrentUserContext from '../contexts/CurrentUserContext';
 import ValidationContext from '../contexts/ValidationContext';
 import LoadingState from '../contexts/LoadingState';
 import api from '../utils/Api';
-import PopupWithAlert from './PopupWithAlert';
 import Login from './Login';
 import Register from './Register';
 import ProtectedRoute from './ProtectedRoute';
+import { checkToken } from '../utils/auth';
+import InfoTooltip from './InfoTooltip';
 
 function App() {
   const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
   const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
   const [isPopupWithSubmitOpen, setIsPopupWithSubmitOpen] = useState(false);
-  const [isShowAlertOpen, setIsShowAlertOpen] = useState(false);
+  const [isInfoTooltipOpen, setIsInfoTooltipOpen] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
   const [selectedCard, setSelectedCard] = useState(false);
   const [loadingText, setLoadingText] = useState('');
   const [card, setCard] = useState({});
   const [cards, setCards] = useState([]);
   const [currentUser, setCurrentUser] = useState({});
-  const [signInScreen, setSignInScreen] = useState(true);
+  const [isSignInLocation, setIsSignInLocation] = useState(true);
   const [email, setEmail] = useState('');
   const [validationContext, setvalidationContext] = useState({ validation: [true, true], validationText: ['', ''], isValid: false });
+  const history = useHistory();
+  const [success, setSuccess] = useState(false);
+  const isMobile = useMediaQuery({ query: '(max-width: 620px)' });
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // Элементам, которые требуется валидировать, нужно выставить уникальные id, которые заканчиваются на цифру от 0 до 9
   function handleInput(e) {
@@ -104,20 +110,20 @@ function App() {
     document.addEventListener('keydown', handleEscButton);
   }
   // Чтение с сервера инфо пользователя, данных карточки
-  // useEffect(() => {
-  //   Promise.all([
-  //     api.getProfileInfo(),
-  //     api.getInitialCards(),
-  //   ])
-  //     .then((values) => {
-  //       const [profileInfo, cardList] = values;
-  //       setCurrentUser(profileInfo);
-  //       setCards(cardList);
-  //     })
-  //     .catch((err) => {
-  //       console.log(err);
-  //     });
-  // }, []);
+  useEffect(() => {
+    Promise.all([
+      api.getProfileInfo(),
+      api.getInitialCards(),
+    ])
+      .then((values) => {
+        const [profileInfo, cardList] = values;
+        setCurrentUser(profileInfo);
+        setCards(cardList);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, [loggedIn]);
 
   // Убрать/поставить лайк карточке
   function handleCardLike(card) {
@@ -188,53 +194,107 @@ function App() {
     setIsAddPlacePopupOpen(false);
     setIsPopupWithSubmitOpen(false);
     setSelectedCard(false);
-    setIsShowAlertOpen(false);
+    setIsInfoTooltipOpen(false);
     document.removeEventListener('keydown', handleEscButton);
     setvalidationContext({ validation: [], validationText: [], isValid: false });
     setCard({});
   }
 
+  // Вход в систему  
+  const handleLogin = _ => {
+    handleCheckToken()
+  }
+
+  // Выход из системы  
+  const handleSignOut = () => {
+      localStorage.removeItem('token');
+      setEmail('');
+      setLoggedIn(false);
+      setIsExpanded(false);
+  }
+
+  // Проверка токена  
+  const handleCheckToken = () => {
+    if (localStorage.getItem('token')){
+      const token = localStorage.getItem('token');
+      checkToken(token).then((res) => {
+        if (res.data?.email){
+            setLoggedIn(true)
+            setEmail(res.data.email)
+            history.push("/cards");
+        }
+      })
+    }
+  }
+
+  // Проверяем токен при загрузке страницы
+  useEffect(()=>{
+      handleCheckToken();
+  },[]);
+
+  useEffect(()=>{
+      setIsSignInLocation(history.location.pathname === '/signin')
+  },[]);
+
+  // Открываем всплывающее окошко
+  const infoToolTipOpen = (type) => {
+      setSuccess(type);
+      setIsInfoTooltipOpen(true);
+  }
+   
   return (
   // Оборачиваем в контекст текущего пользователя
         <CurrentUserContext.Provider value={currentUser}>
             <Header 
+                  isMobile={isMobile}
+                  isExpanded={isExpanded}
                   email={email} 
-                  loggedIn={loggedIn} 
-                  signInScreen={signInScreen} 
-                  // handleLogout={handleLogout} 
-                  // handleSignUp={handleSignUp} 
-                  // handleSignIn={handleSignIn} 
+                  loggedIn={loggedIn}
+                  isSignInLocation={isSignInLocation}
+                  setSignInScreen={()=>setIsSignInLocation(true)}
+                  resetSignInScreen={()=>setIsSignInLocation(false)}
+                  handleSignOut={handleSignOut}
+                  resetEmail={()=>setEmail('')}
+                  expand={()=>setIsExpanded(!isExpanded)}
             />
              {/* Оборачиваем в контекст стейта валидации */}
-              <ValidationContext.Provider value={validationContext}>
+            <ValidationContext.Provider value={validationContext}>
 
                 <Switch>
                     <ProtectedRoute 
-                                  path="/cards" 
-                                  loggedIn={loggedIn}  
-                                  component={Main} 
-                                  onEditProfile={handleEditProfileClick}
-                                  onEditAvatar={handleEditAvatarClick}
-                                  onAddPlace={handleAddPlaceClick}
-                                  onCardClick={handleCardClick}
-                                  onCardLike={handleCardLike}
-                                  onDeleteCard={handleDeleteCardClick}
-                                  cards={cards}/>
-                      {setSignInScreen(false)}
-                  <Route path="/signup">
-                      <Register />
-                      {setSignInScreen(false)}
-                  </Route>
-                  <Route path="/signin">
-                      {setSignInScreen(true)}
-                      <Login />
-                  </Route>
-                  <Route exact path="/">
-                      {loggedIn ? <Redirect to="/cards" /> : <Redirect to="/signin" />}
-                  </Route>
-              </Switch>   
+                        path="/cards" 
+                        loggedIn={loggedIn}  
+                        component={Main} 
+                        onEditProfile={handleEditProfileClick}
+                        onEditAvatar={handleEditAvatarClick}
+                        onAddPlace={handleAddPlaceClick}
+                        onCardClick={handleCardClick}
+                        onCardLike={handleCardLike}
+                        onDeleteCard={handleDeleteCardClick}
+                        cards={cards}
+                    />
+                      
+                    <Route path="/signup">
+                        <Register                             
+                            setOpen={infoToolTipOpen}
+                            setSignInScreen={()=>setIsSignInLocation(true)}
+                        />
+
+                    </Route>
+
+                    <Route path="/signin">
+                        <Login 
+                            setOpen={infoToolTipOpen}
+                            onLogin={handleLogin}
+                        />
+                    </Route>
+
+                    <Route path="/">
+                        {loggedIn ? <Redirect to="/cards" /> : <Redirect to="/signin" />}
+                    </Route>
+                </Switch>   
             
-              <Footer />
+                <Footer />
 
            
                 <LoadingState.Provider value={loadingText}>
@@ -269,15 +329,22 @@ function App() {
                         onDeleteCard={handleDeleteCard}
                         card={card}
                     />
-                </LoadingState.Provider>
-            </ValidationContext.Provider>
+                  </LoadingState.Provider>
+              </ValidationContext.Provider>
 
-            <PopupWithImage
-                isOpen={selectedCard}
-                onClose={closeAllPopups}
-                card={card}
-                noClose={noClose}
-            />
+              <PopupWithImage
+                  isOpen={selectedCard}
+                  onClose={closeAllPopups}
+                  card={card}
+                  noClose={noClose}
+              />
+
+              <InfoTooltip
+                  success={success}
+                  isOpen={isInfoTooltipOpen}
+                  onClose={closeAllPopups}
+                  noClose={noClose}
+              />
         </CurrentUserContext.Provider>
   );
 }

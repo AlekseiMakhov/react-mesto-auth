@@ -1,6 +1,8 @@
 @import url(./__logo/footer__logo.css);
 
 .footer {
+    position: absolute;
+    bottom: 60;
     padding: 66px 19px 60px;
     margin: auto;
     max-width: 882px;

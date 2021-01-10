@@ -1,9 +1,8 @@
 import cn from 'classnames';
 
-function PopupWithAlert({ 
+function InfoTooltip({ 
     isOpen,
     success, 
-    messageText, 
     noClose, 
     onClose 
 }) 
@@ -14,10 +13,13 @@ function PopupWithAlert({
             <div className="popup-info" onClick={noClose}>
                 <button type="button" name="Закрыть" className="popup-info__close-button" onClick={onClose}></button>
                 <div className={cn('popup-info__icon', { 'popup-info__icon_type_abort': !success })}></div>
-                <p className="popup-info__message">{messageText}</p>
+                <p className="popup-info__message">{success 
+                                                            ? 'Вы успешно зарегистрировались!'
+                                                            : 'Что-то пошло не так! Попробуйте еще раз.'
+                }</p>
             </div>
         </section>
     );
 }
 
-export default PopupWithAlert;
+export default InfoTooltip;

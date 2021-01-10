@@ -9,11 +9,11 @@ function Main({
   onCardClick,
   onCardLike,
   onDeleteCard,
-  cards,
+  cards
 }) {
   const currentUser = useContext(CurrentUserContext);
-
-  return (
+    
+    return (
         <main className="content">
             <section className="profile">
                 <div className="avatar" onClick={onEditAvatar}>
@@ -45,7 +45,7 @@ function Main({
             </section>
 
         </main>
-  );
+    );
 }
 
 export default Main;

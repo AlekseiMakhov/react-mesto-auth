@@ -1,45 +1,28 @@
-import { useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import cn from 'classnames';
 import logo from '../images/logo.svg';
-import { logout } from '../utils/auth';
 
-function Header({ email, loggedIn, signInScreen }) {
+function Header({ isMobile, email, loggedIn, isSignInLocation, setSignInScreen, resetSignInScreen, handleSignOut, isExpanded, expand }) {
 
-    const [buttonText, setButtonText] = useState('');
-    const history = useHistory();
-
-    useEffect(() => {
-        if (loggedIn) setButtonText('Выйти');
-        else if (signInScreen) setButtonText('Зарегистрироваться');
-        else setButtonText('Войти');
-
-    }, [loggedIn, signInScreen]);
-
-    const handleLogout = () => {
-        logout();
-        history.push('/signin')
-    }
-
-    const handleSignUp = () => {
-        history.push('/signup')
-    }
-  
-    const handleSignIn = () => {
-        history.push('/signin')
-    }
-
-    const handleClick = _ => {
-        if (loggedIn) handleLogout();
-        if (signInScreen) handleSignUp();
-        handleSignIn();
-    }
-    
     return (
-          <header className="header">
-              <img className="header__logo" src={logo} alt="Лого" />
-              <p class="header__text">{email}</p>
-              <p class="header__text" onClick={handleClick}>{buttonText}</p>
-          </header>
+        !isMobile 
+            ?   <header className="header">
+                    <img className="header__logo" src={logo} alt="Лого" />
+                    <p className="header__text">{email}</p>
+                    {loggedIn && <Link className="header__text" onClick={handleSignOut} to='/signin'>Выйти</Link>}
+                    {!loggedIn && isSignInLocation && <Link className="header__text" onClick={resetSignInScreen} to='/signup'>Зарегистрироваться</Link>}
+                    {!loggedIn && !isSignInLocation && <Link className="header__text" onClick={setSignInScreen} to='/signin'>Войти</Link>}
+                </header>
+            
+            :   <header className={cn('header-mobile', { 'header-mobile__expanded': isExpanded })}>
+                    <img className="header-mobile__logo" src={logo} alt="Лого" />
+                    {isExpanded && <p className="header-mobile__text header-mobile__text_type_email">{email}</p>}
+                    {loggedIn && isExpanded && <Link className={cn('header-mobile__text', { 'header-mobile__text_type_signout': isExpanded })} onClick={handleSignOut} to='/signin'>Выйти</Link>}
+                    {!loggedIn && isSignInLocation && <Link className="header-mobile__text" onClick={resetSignInScreen} to='/signup'>Зарегистрироваться</Link>}
+                    {!loggedIn && !isSignInLocation && <Link className="header-mobile__text" onClick={setSignInScreen} to='/signin'>Войти</Link>}
+                    {isExpanded && <div className='header-mobile__line'></div>}
+                    {loggedIn && <button className={cn('header-mobile__menu-button', { 'header-mobile__menu-button_type_close': isExpanded })} onClick={expand}></button>}
+                </header>
     );
 }
 
