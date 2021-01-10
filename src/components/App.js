@@ -7,17 +7,17 @@ import Footer from './Footer';
 import AddPlacePopup from './AddPlacePopup';
 import EditAvatarPopup from './EditAvatarPopup';
 import EditProfilePopup from './EditProfilePopup';
-import PopupWithImage from './PopupWithImage';
 import PopupWithSubmit from './PopupWithSubmit';
 import CurrentUserContext from '../contexts/CurrentUserContext';
 import ValidationContext from '../contexts/ValidationContext';
 import LoadingState from '../contexts/LoadingState';
-import api from '../utils/Api';
+import api from '../utils/api';
 import Login from './Login';
 import Register from './Register';
 import ProtectedRoute from './ProtectedRoute';
 import { checkToken } from '../utils/auth';
 import InfoTooltip from './InfoTooltip';
+import ImagePopup from './ImagePopup';
 
 function App() {
   const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
@@ -332,7 +332,7 @@ function App() {
                   </LoadingState.Provider>
               </ValidationContext.Provider>
 
-              <PopupWithImage
+              <ImagePopup
                   isOpen={selectedCard}
                   onClose={closeAllPopups}
                   card={card}

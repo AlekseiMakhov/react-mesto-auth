@@ -1,6 +1,6 @@
 import cn from 'classnames';
 
-function PopupWithImage({
+function ImagePopup({
   isOpen,
   onClose,
   card,
@@ -17,4 +17,4 @@ function PopupWithImage({
   );
 }
 
-export default PopupWithImage;
+export default ImagePopup;
