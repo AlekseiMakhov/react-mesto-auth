@@ -25,7 +25,7 @@ function Login({ setOpen, onLogin }) {
                     history.push('/cards');
                 } else {
                     setOpen(false);
-                    console.log(data.error);
+                    console.log(data);
                 }  
             })
             .catch(err => {console.log(err); 
