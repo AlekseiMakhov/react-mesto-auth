@@ -1,22 +1,22 @@
 {
   "files": {
-    "main.css": "/react-mesto-auth/static/css/main.a213fc48.chunk.css",
-    "main.js": "/react-mesto-auth/static/js/main.b687aacf.chunk.js",
-    "main.js.map": "/react-mesto-auth/static/js/main.b687aacf.chunk.js.map",
-    "runtime-main.js": "/react-mesto-auth/static/js/runtime-main.1ead0e4d.js",
-    "runtime-main.js.map": "/react-mesto-auth/static/js/runtime-main.1ead0e4d.js.map",
-    "static/js/2.90f7e7c0.chunk.js": "/react-mesto-auth/static/js/2.90f7e7c0.chunk.js",
-    "static/js/2.90f7e7c0.chunk.js.map": "/react-mesto-auth/static/js/2.90f7e7c0.chunk.js.map",
-    "index.html": "/react-mesto-auth/index.html",
-    "static/css/main.a213fc48.chunk.css.map": "/react-mesto-auth/static/css/main.a213fc48.chunk.css.map",
-    "static/js/2.90f7e7c0.chunk.js.LICENSE.txt": "/react-mesto-auth/static/js/2.90f7e7c0.chunk.js.LICENSE.txt",
-    "static/media/index.css": "/react-mesto-auth/static/media/like_icon_black.a7ffe37d.svg",
-    "static/media/logo.c2821b38.svg": "/react-mesto-auth/static/media/logo.c2821b38.svg"
+    "main.css": "/mesto-react-auth/static/css/main.fd729285.chunk.css",
+    "main.js": "/mesto-react-auth/static/js/main.b687aacf.chunk.js",
+    "main.js.map": "/mesto-react-auth/static/js/main.b687aacf.chunk.js.map",
+    "runtime-main.js": "/mesto-react-auth/static/js/runtime-main.6bbb5760.js",
+    "runtime-main.js.map": "/mesto-react-auth/static/js/runtime-main.6bbb5760.js.map",
+    "static/js/2.90f7e7c0.chunk.js": "/mesto-react-auth/static/js/2.90f7e7c0.chunk.js",
+    "static/js/2.90f7e7c0.chunk.js.map": "/mesto-react-auth/static/js/2.90f7e7c0.chunk.js.map",
+    "index.html": "/mesto-react-auth/index.html",
+    "static/css/main.fd729285.chunk.css.map": "/mesto-react-auth/static/css/main.fd729285.chunk.css.map",
+    "static/js/2.90f7e7c0.chunk.js.LICENSE.txt": "/mesto-react-auth/static/js/2.90f7e7c0.chunk.js.LICENSE.txt",
+    "static/media/index.css": "/mesto-react-auth/static/media/like_icon_black.a7ffe37d.svg",
+    "static/media/logo.c2821b38.svg": "/mesto-react-auth/static/media/logo.c2821b38.svg"
   },
   "entrypoints": [
-    "static/js/runtime-main.1ead0e4d.js",
+    "static/js/runtime-main.6bbb5760.js",
     "static/js/2.90f7e7c0.chunk.js",
-    "static/css/main.a213fc48.chunk.css",
+    "static/css/main.fd729285.chunk.css",
     "static/js/main.b687aacf.chunk.js"
   ]
 }
