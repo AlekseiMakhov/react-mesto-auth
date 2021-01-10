@@ -1,6 +1,6 @@
 # Проект: Место (REACT)
 
-* [Ссылка на сайт на github pages](https://alekseimakhov.github.io/mesto-react-auth/)
+* [Ссылка на сайт на github pages](https://alekseimakhov.github.io/react-mesto-auth/)
 
 ### Функционал
 
