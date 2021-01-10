@@ -123,7 +123,7 @@ function App() {
       .catch((err) => {
         console.log(err);
       });
-  }, [loggedIn]);
+  }, []);
 
   // Убрать/поставить лайк карточке
   function handleCardLike(card) {
