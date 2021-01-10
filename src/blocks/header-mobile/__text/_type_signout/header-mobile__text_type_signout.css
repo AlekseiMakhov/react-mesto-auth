@@ -7,6 +7,8 @@
     color: #a9a9a9;
     text-decoration: none;
     margin: 9px auto 40px;
+    font-size: 18px;
+    line-height: 22px;
 }
 
 .header-mobile__text_type_signout:hover {
