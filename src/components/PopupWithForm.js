@@ -3,19 +3,19 @@ import { useContext } from 'react';
 import LoadingState from '../contexts/LoadingState';
 import ValidationContext from '../contexts/ValidationContext';
 
-function PopupWithForm({
-  name,
-  title,
-  children,
-  isOpen,
-  onClose,
-  onSubmit,
-  noClose,
-}) {
-  const validationContext = useContext(ValidationContext);
-  const loadingText = useContext(LoadingState);
+const PopupWithForm = ({
+    name,
+    title,
+    children,
+    isOpen,
+    onClose,
+    onSubmit,
+    noClose
+}) => {
+    const validationContext = useContext(ValidationContext);
+    const loadingText = useContext(LoadingState);
 
-  return (
+    return (
         <>
             <section className={cn(`popup popup_type_${name}`, { popup_opened: isOpen })} onClick={onClose}>
                 <form className="popup-form" name={name} onSubmit={onSubmit} onClick={noClose}>
@@ -26,7 +26,7 @@ function PopupWithForm({
                 </form>
             </section>
         </>
-  );
+    );
 }
 
 export default PopupWithForm;

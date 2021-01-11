@@ -1,12 +1,9 @@
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import { authorize } from '../utils/auth';
 
-function Login({ setOpen, onLogin }) {
+const Login = ({ onLogin }) => {
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const history = useHistory();
 
     const handleEmailInput = (e) => setEmail(e.target.value);
     const handlePasswordInput = (e) => setPassword(e.target.value);
@@ -16,21 +13,7 @@ function Login({ setOpen, onLogin }) {
         if (!email || !password) {
             return;
         }
-        authorize(email, password)
-            .then((data) => {
-                if (data.token) {
-                    setEmail('');
-                    setPassword('');
-                    onLogin();
-                    history.push('/cards');
-                } else {
-                    setOpen(false);
-                    console.log(data);
-                }  
-            })
-            .catch(err => {console.log(err); 
-                setOpen(false);
-            });
+        onLogin(email, password);
     } 
 
     return (

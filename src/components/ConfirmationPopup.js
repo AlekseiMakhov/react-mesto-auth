@@ -1,19 +1,18 @@
-// import cn from 'classnames';
 import PopupWithForm from './PopupWithForm';
 
-function PopupWithSubmit({
-  isOpen,
-  onClose,
-  noClose,
-  onDeleteCard,
-  card,
-}) {
-  function handleSubmit(e) {
-    e.preventDefault();
-    onDeleteCard(card);
-  }
+const ConfirmationPopup = ({
+    isOpen,
+    onClose,
+    noClose,
+    onDeleteCard,
+    card
+}) => {
+    function handleSubmit(e) {
+        e.preventDefault();
+        onDeleteCard(card);
+    }
 
-  return (
+    return (
         <PopupWithForm
             name='submit'
             title='Вы уверены?'
@@ -22,7 +21,7 @@ function PopupWithSubmit({
             onSubmit={handleSubmit}
             noClose={noClose}
         />
-  );
+    );
 }
 
-export default PopupWithSubmit;
+export default ConfirmationPopup;

@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { register } from '../utils/auth';
 
-function Register({ setOpen, setSignInScreen }) {
+const Register = ({ 
+    onRegister, 
+    setSignInScreen 
+}) => {
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -17,24 +19,7 @@ function Register({ setOpen, setSignInScreen }) {
         if (!email || !password) {
             return;
         }
-        register(email, password)
-            .then((res) => {
-                if (res.data?._id) {
-                    setEmail('');
-                    setPassword('');
-                    setOpen(true);
-                    history.push('/signin');
-                    setSignInScreen();
-                }
-                else {
-                    setOpen(false);
-                    console.log(res.error);
-                }    
-            })
-            .catch(err => {
-                console.log(err);
-                setOpen(false);
-            });
+        onRegister(email, password);
     }
 
     const onSignInClick = _ => {

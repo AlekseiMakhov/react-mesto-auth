@@ -1,5 +1,13 @@
-import { useState, useEffect } from 'react';
-import { Route, Switch, Redirect, useHistory } from 'react-router-dom';
+import { 
+    useState,
+    useEffect 
+} from 'react';
+import { 
+    Route, 
+    Switch, 
+    Redirect, 
+    useHistory 
+} from 'react-router-dom';
 import { useMediaQuery } from 'react-responsive';
 import Header from './Header';
 import Main from './Main';
@@ -7,7 +15,7 @@ import Footer from './Footer';
 import AddPlacePopup from './AddPlacePopup';
 import EditAvatarPopup from './EditAvatarPopup';
 import EditProfilePopup from './EditProfilePopup';
-import PopupWithSubmit from './PopupWithSubmit';
+import ConfirmationPopup from './ConfirmationPopup';
 import CurrentUserContext from '../contexts/CurrentUserContext';
 import ValidationContext from '../contexts/ValidationContext';
 import LoadingState from '../contexts/LoadingState';
@@ -15,235 +23,314 @@ import api from '../utils/api';
 import Login from './Login';
 import Register from './Register';
 import ProtectedRoute from './ProtectedRoute';
-import { checkToken } from '../utils/auth';
 import InfoTooltip from './InfoTooltip';
 import ImagePopup from './ImagePopup';
 
 function App() {
-  const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
-  const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
-  const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
-  const [isPopupWithSubmitOpen, setIsPopupWithSubmitOpen] = useState(false);
-  const [isInfoTooltipOpen, setIsInfoTooltipOpen] = useState(false);
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [selectedCard, setSelectedCard] = useState(false);
-  const [loadingText, setLoadingText] = useState('');
-  const [card, setCard] = useState({});
-  const [cards, setCards] = useState([]);
-  const [currentUser, setCurrentUser] = useState({});
-  const [isSignInLocation, setIsSignInLocation] = useState(true);
-  const [email, setEmail] = useState('');
-  const [validationContext, setvalidationContext] = useState({ validation: [true, true], validationText: ['', ''], isValid: false });
-  const history = useHistory();
-  const [success, setSuccess] = useState(false);
-  const isMobile = useMediaQuery({ query: '(max-width: 620px)' });
-  const [isExpanded, setIsExpanded] = useState(false);
+    const BASE_URL = 'https://auth.nomoreparties.co';
+    const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
+    const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
+    const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
+    const [isPopupWithSubmitOpen, setIsPopupWithSubmitOpen] = useState(false);
+    const [isInfoTooltipOpen, setIsInfoTooltipOpen] = useState(false);
+    const [loggedIn, setLoggedIn] = useState(false);
+    const [selectedCard, setSelectedCard] = useState(false);
+    const [loadingText, setLoadingText] = useState('');
+    const [card, setCard] = useState({});
+    const [cards, setCards] = useState([]);
+    const [currentUser, setCurrentUser] = useState({});
+    const [isSignInLocation, setIsSignInLocation] = useState(true);
+    const [email, setEmail] = useState('');
+    const [validationContext, setvalidationContext] = useState({ validation: [true, true], validationText: ['', ''], isValid: false });
+    const history = useHistory();
+    const [success, setSuccess] = useState(false);
+    const isMobile = useMediaQuery({ query: '(max-width: 620px)' });
+    const [isExpanded, setIsExpanded] = useState(false);
 
-  // Элементам, которые требуется валидировать, нужно выставить уникальные id, которые заканчиваются на цифру от 0 до 9
-  function handleInput(e) {
-    const validArr = validationContext.validation;
-    const textArr = validationContext.validationText;
-    const index = Number(e.target.id[e.target.id.length-1]);
-    let resValid = 0;
+    // Элементам, которые требуется валидировать, нужно выставить уникальные id, которые заканчиваются на цифру от 0 до 9
+    function handleInput(e) {
+        const validArr = validationContext.validation;
+        const textArr = validationContext.validationText;
+        const index = Number(e.target.id[e.target.id.length-1]);
+        let resValid = 0;
 
-    validArr[index] = e.target.validity.valid;
-    textArr[index] = e.target.validationMessage;
+        validArr[index] = e.target.validity.valid;
+        textArr[index] = e.target.validationMessage;
 
-    for (let i = 0; i < validArr.length; i++) {
-      resValid += Number(validArr[i]);
-    }
-
-    setvalidationContext({ validation: validArr, validationText: textArr, isValid: (resValid === validArr.length) });
-  }
-  // Закрытие модальных окон по Escape
-  function handleEscButton(e) {
-    if (e.key === 'Escape') {
-      closeAllPopups();
-    }
-  }
-
-  // Открытие формы редактирования аватара
-  function handleEditAvatarClick() {
-    setIsEditAvatarPopupOpen(true);
-    setLoadingText('Изменить');
-    // Устанавливаем параметры контекста для валидации текущей формы
-    // validation - массив содержит число элементов = числу валидируемых элементов формы, принимает значение validity.valid
-    // validationText - массив содержит число элементов = числу валидируемых элементов формы, принимает значение validationMessage
-    // isValid - булева величина, содержит результат валидации всех полей, true - если все поля валидны
-    setvalidationContext({ validation: [true], validationText: [''], isValid: false });
-    document.addEventListener('keydown', handleEscButton);
-  }
-  // Открытие формы редактирования профиля
-  function handleEditProfileClick() {
-    setIsEditProfilePopupOpen(true);
-    setLoadingText('Сохранить');
-    // Устанавливаем параметры контекста для валидации текущей формы
-    setvalidationContext({ validation: [true, true], validationText: ['', ''], isValid: true });
-    document.addEventListener('keydown', handleEscButton);
-  }
-
-  // Открытие формы добавления карточки
-  function handleAddPlaceClick() {
-    setIsAddPlacePopupOpen(true);
-    setLoadingText('Создать');
-    // Устанавливаем параметры контекста для валидации текущей формы
-    setvalidationContext({ validation: [true, true], validationText: ['', ''], isValid: false });
-    document.addEventListener('keydown', handleEscButton);
-  }
-  
-  // Отмена всплытия для закрытия по клику по оверлею
-  function noClose(e) {
-    e.stopPropagation();
-  }
-  // Клик по картинке, открытие увеличенной картинки
-  function handleCardClick(card) {
-    setSelectedCard(true);
-    setCard(card);
-    document.addEventListener('keydown', handleEscButton);
-  }
-  // Нажатие на кнопку удаления, открытие окна с подтверждением
-  function handleDeleteCardClick(card) {
-    setIsPopupWithSubmitOpen(true);
-    setLoadingText('Да');
-    setvalidationContext({ validation: [], validationText: [], isValid: true });
-    setCard(card);
-    document.addEventListener('keydown', handleEscButton);
-  }
-  // Чтение с сервера инфо пользователя, данных карточки
-  useEffect(() => {
-    Promise.all([
-      api.getProfileInfo(),
-      api.getInitialCards(),
-    ])
-      .then((values) => {
-        const [profileInfo, cardList] = values;
-        setCurrentUser(profileInfo);
-        setCards(cardList);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, []);
-
-  // Убрать/поставить лайк карточке
-  function handleCardLike(card) {
-    const isLiked = card.likes.some((i) => i._id === currentUser._id);
-    api.changeLikeStatus(card._id, !isLiked)
-      .then((newCard) => {
-        const newCards = cards.map((c) => (c._id === card._id ? newCard : c));
-        setCards(newCards);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }
-  // Удаление карточки
-  function handleDeleteCard(card) {
-    setLoadingText('Удаление...');
-    api.deleteCard(card._id)
-      .then(() => {
-        const newCards = cards.filter((c) => c._id !== card._id);
-        setCards(newCards);
-        closeAllPopups();
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }
-  // Смена инфо пользователя
-  function handleUpdateUser(userInfo) {
-    setLoadingText('Сохранение...');
-    api.editProfileInfo(userInfo)
-      .then((userInfo) => {
-        setCurrentUser(userInfo);
-        closeAllPopups();
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }
-  // Смена аватара
-  function handleUpdateAvatar(user) {
-    setLoadingText('Сохранение...');
-    api.editAvatar(user.avatar)
-      .then((userInfo) => {
-        setCurrentUser(userInfo);
-        closeAllPopups();
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }
-  // Добавление карточки
-  function handleAddPlace(newCard) {
-    setLoadingText('Загрузка...');
-    api.createNewCard(newCard)
-      .then((newCard) => {
-        setCards([newCard, ...cards]);
-        closeAllPopups();
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }
-
-  // Закрытие модальных окон, снятие слушателя Escape
-  function closeAllPopups() {
-    setIsEditAvatarPopupOpen(false);
-    setIsEditProfilePopupOpen(false);
-    setIsAddPlacePopupOpen(false);
-    setIsPopupWithSubmitOpen(false);
-    setSelectedCard(false);
-    setIsInfoTooltipOpen(false);
-    document.removeEventListener('keydown', handleEscButton);
-    setvalidationContext({ validation: [], validationText: [], isValid: false });
-    setCard({});
-  }
-
-  // Вход в систему  
-  const handleLogin = _ => {
-    handleCheckToken()
-  }
-
-  // Выход из системы  
-  const handleSignOut = () => {
-      localStorage.removeItem('token');
-      setEmail('');
-      setLoggedIn(false);
-      setIsExpanded(false);
-  }
-
-  // Проверка токена  
-  const handleCheckToken = () => {
-    if (localStorage.getItem('token')){
-      const token = localStorage.getItem('token');
-      checkToken(token).then((res) => {
-        if (res.data?.email){
-            setLoggedIn(true)
-            setEmail(res.data.email)
-            history.push("/cards");
+        for (let i = 0; i < validArr.length; i++) {
+          resValid += Number(validArr[i]);
         }
-      })
+
+        setvalidationContext({ 
+            validation: validArr, 
+            validationText: textArr, 
+            isValid: (resValid === validArr.length) 
+        });
     }
-  }
 
-  // Проверяем токен при загрузке страницы
-  useEffect(()=>{
-      handleCheckToken();
-  },[]);
+    // Закрытие модальных окон по Escape
+    function handleEscButton(e) {
+        if (e.key === 'Escape') {
+            closeAllPopups();
+        }
+    }
 
-  useEffect(()=>{
-      setIsSignInLocation(history.location.pathname === '/signin')
-  },[]);
+    // Открытие формы редактирования аватара
+    function handleEditAvatarClick() {
+        setIsEditAvatarPopupOpen(true);
+        setLoadingText('Изменить');
+        // Устанавливаем параметры контекста для валидации текущей формы
+        // validation - массив содержит число элементов = числу валидируемых элементов формы, принимает значение validity.valid
+        // validationText - массив содержит число элементов = числу валидируемых элементов формы, принимает значение validationMessage
+        // isValid - булева величина, содержит результат валидации всех полей, true - если все поля валидны
+        setvalidationContext({ validation: [true], validationText: [''], isValid: false });
+        document.addEventListener('keydown', handleEscButton);
+    }
 
-  // Открываем всплывающее окошко
-  const infoToolTipOpen = (type) => {
-      setSuccess(type);
-      setIsInfoTooltipOpen(true);
-  }
-   
-  return (
-  // Оборачиваем в контекст текущего пользователя
+    // Открытие формы редактирования профиля
+    function handleEditProfileClick() {
+        setIsEditProfilePopupOpen(true);
+        setLoadingText('Сохранить');
+        // Устанавливаем параметры контекста для валидации текущей формы
+        setvalidationContext({ validation: [true, true], validationText: ['', ''], isValid: true });
+        document.addEventListener('keydown', handleEscButton);
+    }
+
+    // Открытие формы добавления карточки
+    function handleAddPlaceClick() {
+        setIsAddPlacePopupOpen(true);
+        setLoadingText('Создать');
+        // Устанавливаем параметры контекста для валидации текущей формы
+        setvalidationContext({ validation: [true, true], validationText: ['', ''], isValid: false });
+        document.addEventListener('keydown', handleEscButton);
+    }
+    
+    // Отмена всплытия для закрытия по клику по оверлею
+    function noClose(e) {
+        e.stopPropagation();
+    }
+
+    // Клик по картинке, открытие увеличенной картинки
+    function handleCardClick(card) {
+        setSelectedCard(true);
+        setCard(card);
+        document.addEventListener('keydown', handleEscButton);
+    }
+
+    // Нажатие на кнопку удаления, открытие окна с подтверждением
+    function handleDeleteCardClick(card) {
+        setIsPopupWithSubmitOpen(true);
+        setLoadingText('Да');
+        setvalidationContext({ validation: [], validationText: [], isValid: true });
+        setCard(card);
+        document.addEventListener('keydown', handleEscButton);
+    }
+
+    // Чтение с сервера инфо пользователя, данных карточки
+    useEffect(() => {
+        Promise.all([
+            api.getProfileInfo(),
+            api.getInitialCards(),
+        ])
+            .then(([profileInfo, cardList]) => {
+                setCurrentUser(profileInfo);
+                setCards(cardList);
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }, []);
+
+    // Убрать/поставить лайк карточке
+    function handleCardLike(card) {
+        const isLiked = card.likes.some((i) => i._id === currentUser._id);
+          api.changeLikeStatus(card._id, !isLiked)
+            .then((newCard) => {
+                const newCards = cards.map((c) => (c._id === card._id ? newCard : c));
+                setCards(newCards);
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }
+    // Удаление карточки
+    function handleDeleteCard(card) {
+        setLoadingText('Удаление...');
+        api.deleteCard(card._id)
+            .then(() => {
+                const newCards = cards.filter((c) => c._id !== card._id);
+                setCards(newCards);
+                closeAllPopups();
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }
+    // Смена инфо пользователя
+    function handleUpdateUser(userInfo) {
+        setLoadingText('Сохранение...');
+        api.editProfileInfo(userInfo)
+            .then((userInfo) => {
+                setCurrentUser(userInfo);
+                closeAllPopups();
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }
+    // Смена аватара
+    function handleUpdateAvatar(user) {
+        setLoadingText('Сохранение...');
+        api.editAvatar(user.avatar)
+            .then((userInfo) => {
+                setCurrentUser(userInfo);
+                closeAllPopups();
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }
+    // Добавление карточки
+    function handleAddPlace(newCard) {
+        setLoadingText('Загрузка...');
+        api.createNewCard(newCard)
+            .then((newCard) => {
+                setCards([newCard, ...cards]);
+                closeAllPopups();
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }
+
+    // Закрытие модальных окон, снятие слушателя Escape
+    function closeAllPopups() {
+        setIsEditAvatarPopupOpen(false);
+        setIsEditProfilePopupOpen(false);
+        setIsAddPlacePopupOpen(false);
+        setIsPopupWithSubmitOpen(false);
+        setSelectedCard(false);
+        setIsInfoTooltipOpen(false);
+        document.removeEventListener('keydown', handleEscButton);
+        setvalidationContext({ validation: [], validationText: [], isValid: false });
+        setCard({});
+    }
+
+    // Вход в систему  
+    const handleLogin = _ => {
+        setLoggedIn(true);
+        history.push("/cards");
+    }
+
+    // Выход из системы  
+    const handleSignOut = () => {
+        localStorage.removeItem('token');
+        setEmail('');
+        setLoggedIn(false);
+        setIsExpanded(false);
+        setIsSignInLocation(true);
+    }
+
+    // Проверяем токен при загрузке страницы
+    useEffect(()=>{
+        checkToken();
+    },[]);
+
+    // Открываем всплывающее окошко
+    const infoToolTipOpen = (type) => {
+        setSuccess(type);
+        setIsInfoTooltipOpen(true);
+    }
+
+    // Обработка запроса авторизации
+    const onLogin = (email, password) => {
+        return fetch(`${BASE_URL}/signin`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ password, email })
+            })
+            .then(response => {
+                if (response.status === 400) {
+                  throw new Error('Не передано одно из полей')
+                } else if (response.status === 401) {
+                  throw new Error('Некорректный email или пароль')
+                } else
+                return response.json()
+            })   
+            .then((data) => {
+                if (data.token) {
+                    localStorage.setItem('token', data.token);
+                    handleLogin();
+                    setEmail(email);
+                }
+            })  
+            .catch(err => {
+                console.log(err);
+                infoToolTipOpen(false);
+            });
+    };
+
+    // Обработка запроса регистрации
+    const onRegister = (email, password) => {
+        return fetch(`${BASE_URL}/signup`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ password, email })
+        })
+        .then(response => {
+            if (response.status === 400) throw new Error('Некорректно заполнено одно из полей') 
+            return response.json()})
+        .then((res) => {
+            if (res.data?._id) {
+                infoToolTipOpen(true);
+                history.push('/signin');
+                setIsSignInLocation();
+            }                   
+        })
+        .catch((err) => {
+            console.log(err)
+            infoToolTipOpen(false);
+        });
+    };
+
+    // Проверка токена  
+    const checkToken = () => {
+        if (localStorage.getItem('token')) {
+            const token = localStorage.getItem('token');
+            return fetch(`${BASE_URL}/users/me`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                }
+            })
+            .then(response => {
+                if (response.status === 400) {
+                    throw new Error('Токен не передан или передан не в том формате')
+                } else if (response.status === 401) {
+                    throw new Error('Передан некоррекный токен')
+                } else
+                return response.json()
+            })
+            .then(res => {
+                if (res.data?.email) {
+                    setEmail(res.data.email);
+                    handleLogin();
+                }
+            })
+            .catch(err => console.log(err));
+        }    
+    }
+
+    return (
+        // Оборачиваем в контекст текущего пользователя
         <CurrentUserContext.Provider value={currentUser}>
             <Header 
                   isMobile={isMobile}
@@ -257,7 +344,7 @@ function App() {
                   resetEmail={()=>setEmail('')}
                   expand={()=>setIsExpanded(!isExpanded)}
             />
-             {/* Оборачиваем в контекст стейта валидации */}
+            {/* Оборачиваем в контекст стейта валидации */}
             <ValidationContext.Provider value={validationContext}>
 
                 <Switch>
@@ -276,16 +363,17 @@ function App() {
                       
                     <Route path="/signup">
                         <Register                             
-                            setOpen={infoToolTipOpen}
+                            // setOpen={infoToolTipOpen}
                             setSignInScreen={()=>setIsSignInLocation(true)}
+                            onRegister={onRegister}
                         />
 
                     </Route>
 
                     <Route path="/signin">
                         <Login 
-                            setOpen={infoToolTipOpen}
-                            onLogin={handleLogin}
+                            // setOpen={infoToolTipOpen}
+                            onLogin={onLogin}
                         />
                     </Route>
 
@@ -296,7 +384,7 @@ function App() {
             
                 <Footer />
 
-           
+          
                 <LoadingState.Provider value={loadingText}>
                     <EditProfilePopup
                         isOpen={isEditProfilePopupOpen}
@@ -322,7 +410,7 @@ function App() {
                         onInput={handleInput}
                     />
 
-                    <PopupWithSubmit
+                    <ConfirmationPopup
                         isOpen={isPopupWithSubmitOpen}
                         onClose={closeAllPopups}
                         noClose={noClose}
@@ -346,7 +434,7 @@ function App() {
                   noClose={noClose}
               />
         </CurrentUserContext.Provider>
-  );
+    );
 }
 
 export default App;
