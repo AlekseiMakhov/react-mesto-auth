@@ -25,9 +25,9 @@ import Register from './Register';
 import ProtectedRoute from './ProtectedRoute';
 import InfoTooltip from './InfoTooltip';
 import ImagePopup from './ImagePopup';
+import { authorize, register, tokenCheck } from '../utils/auth';
 
 function App() {
-    const BASE_URL = 'https://auth.nomoreparties.co';
     const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
     const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
     const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
@@ -244,22 +244,7 @@ function App() {
 
     // Обработка запроса авторизации
     const onLogin = (email, password) => {
-        return fetch(`${BASE_URL}/signin`, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ password, email })
-            })
-            .then(response => {
-                if (response.status === 400) {
-                  throw new Error('Не передано одно из полей')
-                } else if (response.status === 401) {
-                  throw new Error('Некорректный email или пароль')
-                } else
-                return response.json()
-            })   
+        authorize(email, password)   
             .then((data) => {
                 if (data.token) {
                     localStorage.setItem('token', data.token);
@@ -275,17 +260,7 @@ function App() {
 
     // Обработка запроса регистрации
     const onRegister = (email, password) => {
-        return fetch(`${BASE_URL}/signup`, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ password, email })
-        })
-        .then(response => {
-            if (response.status === 400) throw new Error('Некорректно заполнено одно из полей') 
-            return response.json()})
+        register(email, password)
         .then((res) => {
             if (res.data?._id) {
                 infoToolTipOpen(true);
@@ -303,22 +278,7 @@ function App() {
     const checkToken = () => {
         if (localStorage.getItem('token')) {
             const token = localStorage.getItem('token');
-            return fetch(`${BASE_URL}/users/me`, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                }
-            })
-            .then(response => {
-                if (response.status === 400) {
-                    throw new Error('Токен не передан или передан не в том формате')
-                } else if (response.status === 401) {
-                    throw new Error('Передан некоррекный токен')
-                } else
-                return response.json()
-            })
+            tokenCheck(token)
             .then(res => {
                 if (res.data?.email) {
                     setEmail(res.data.email);
@@ -383,7 +343,6 @@ function App() {
                 </Switch>   
             
                 <Footer />
-
           
                 <LoadingState.Provider value={loadingText}>
                     <EditProfilePopup
